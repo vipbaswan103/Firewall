@@ -1,0 +1,109 @@
+﻿**************************Packet Input Format******************************************************************************************************************************
+(Everything in the packet has to be provided)
+
+"<Adapter_Type>#<Ethernet_VID>,<Ethernet_Protocol>#<IP_Src_Address>,<IP_Dest_Address>,<IP_Protocol_Type>#<X>,<Y>".
+ where
+ <X>=<Tcp_Scr> and <Y>=<Tcp_Dest> when <IP_Protocol_Type>=tcp
+ <X>=<Udp_Scr> and <Y>=<Udp_Dest> when <IP_Protocol_Type>=udp
+ <X>=<Icmp_Type> and <Y>=<Icmp_Code> when <IP_Protocol_Type>=icmp
+ 
+Note: It is expected the user will enter a valid IP Protocol Type, otherwise packet is dropped or rejected by the program
+
+**************************Default Rules for Accepting Packet***************************************************************************************************************
+
+(Note_1: _ means no condition on that parameter, in code it is passed as null in Rule Base)
+(Note_2: Since default IP protocol type is UDP i.e. UDP protocol is being allowed, values are set only for UDP)
+(Note_3: Configurations are changeable, provided user enters rules according to the syntax)
+
+<Adapter_Type>=A or B or C or D 		else Reject
+<Ethernet_VID>=between 25 and 40(inclusive)	else Reject
+<Ethernet_Protocol>=255          		else Reject
+<IP_Src_Address>=172.24.16.31			else Reject		
+<IP_Dest_Address>=172.24.16.35			else Reject
+<IP_Protocol_Type>=udp				else Reject
+<TCP_Src>=_					else Drop (silently)
+<TCP_Dest>=_					else Drop (silently)
+<UDP_Src>=13					else Drop (silently)
+<UDP_Dest>=133					else Drop (silently)
+<ICMP_Type>=_					else Drop (silently)
+<ICMP_Code>=_ 					else Drop (silently)
+
+***************************Sample Inputs and Outputs***********************************************************************************************************************
+
+?- printResult.
+"Enter the packet: "
+|:  "A#25,255#172.24.16.31,172.24.16.35,udp#13,133".
+"Accepted!!"
+true.
+
+
+?- printResult.
+"Enter the packet: "
+|: "D#25,255#172.24.16.31,172.24.16.35,udp#13,133".
+"Accepted!!"
+true.
+
+
+?- printResult.
+"Enter the packet: "
+|: "D#35,255#172.24.16.31,172.24.16.35,udp#13,133".
+"Accepted!!"
+true.
+
+
+?- printResult.
+"Enter the packet: "
+|: "B#37,255#172.24.16.31,172.24.16.35,udp#13,133".
+"Accepted!!"
+true.
+
+
+?- printResult.
+"Enter the packet: "
+|: "E#25,255#172.24.16.31,172.24.16.35,udp#13,133".
+"Rejecting... (Reason: Adapter Unmatch)"
+true.
+
+
+?- printResult.
+"Enter the packet: "
+|: "G#25,255#17.24.16.31,172.24.16.35,udp#13,133".
+"Rejecting... (Reason: Adapter Unmatch)"
+true.
+
+
+?- printResult.
+"Enter the packet: "
+|: "D#14,255#172.24.16.31,172.24.16.35,udp#13,133".
+"Rejecting... (Reason: Ethernet Unmatch)"
+true.
+
+
+?- printResult.
+"Enter the packet: "
+|: "B#45,255#172.24.16.31,172.24.16.35,udp#13,133".
+"Rejecting... (Reason: Ethernet Unmatch)"
+true.
+
+
+
+?- printResult.
+"Enter the packet: "
+|: "D#25,255#172.24.16.31,172.24.16.45,udp#13,133".
+"Rejecting... (Reason: IPV4 Unmatch)"
+true.
+
+
+?- printResult.
+"Enter the packet: "
+|: "D#25,255#172.24.16.31,172.24.16.45,tcp#13,133".
+"Rejecting... (Reason: IPV4 Unmatch)"
+true.
+
+
+?- printResult.
+"Enter the packet: "
+|: "D#25,255#172.24.16.31,172.24.16.35,udp#133,1".
+
+true.
+
